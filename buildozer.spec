@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = Mortgage Calculator
+title = Timetable NF UUNIT
 
 # (str) Package name
-package.name = mortgagecalculator
+package.name = timetable_uunit
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.wiseplat
+package.domain = org.DudeGeo
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -46,7 +46,7 @@ requirements = python3,kivy==2.3.0,kivymd,https://github.com/kivymd/KivyMD/archi
 # presplash.filename = %(source.dir)s/data/logo/presplash512okmin.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/images/
+icon.filename = %(source.dir)s/images/1.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = all
@@ -65,7 +65,7 @@ orientation = all
 osx.python_version = 3
 
 # Kivy version to use
-osx.kivy_version = 2.0.0
+osx.kivy_version = 2.3.0
 
 #
 # Android specific

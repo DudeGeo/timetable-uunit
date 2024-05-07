@@ -4,7 +4,7 @@
 title = Timetable NF UUNIT
 
 # (str) Package name
-package.name = timetable_nf_uunit
+package.name = timetable_uunit
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.DudeGeo

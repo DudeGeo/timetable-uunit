@@ -28,7 +28,7 @@ class Example(MDApp):
 
     def handle_search(self, query):
         """Обработка нажатия кнопки поиска"""
-        self.search_query = query
+        self.search_query = query + "_"
         self.search_data()
 
     def load_data(self):
@@ -36,6 +36,7 @@ class Example(MDApp):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 self.data = json.load(f)
+
         except FileNotFoundError:
             # print("Ошибка при загрузке данных...")
             self.run_parser_in_background()
@@ -137,7 +138,7 @@ class Example(MDApp):
 
                     label_text = MDLabel(
                         text=f"{class_['text']}",
-                        adaptive_height=True,
+                        size_hint_y=None,
                         theme_text_color="Custom",
                         text_color=(0, 0, 0, 1)  # Цвет для занятий
                     )
@@ -167,8 +168,4 @@ class Example(MDApp):
 
 
 if __name__ == "__main__":
-    background_parser = threading.Thread(target=the_parsing_script.main_0())
-    background_parser.daemon = True
-    background_parser.start()
     Example().run()
-

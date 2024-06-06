@@ -1,9 +1,13 @@
-import parser
-import the_parsing_script
+import httpx
+import schedule
+from datetime import datetime
+from bs4 import BeautifulSoup
 import json
-import threading
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from kivy.lang import Builder
+from kivy.clock import Clock
 
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
@@ -17,6 +21,7 @@ from watchdog.events import FileSystemEventHandler
 class Example(MDApp):
     def __init__(self):
         super().__init__()
+        self.executor = ThreadPoolExecutor(max_workers=5)
         self.screen = Builder.load_file('interface_app.kv')
         self.observer = None
         self.search_query = ""
@@ -36,22 +41,103 @@ class Example(MDApp):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 self.data = json.load(f)
+            self.run_parser_script()
         except FileNotFoundError:
             # print("Ошибка при загрузке данных...")
             self.run_parser_in_background()
 
-    def run_parser_in_background(self):
-        """Запуск основного парсера в фоновом потоке"""
-        self.show_loading_message()
-        parser_thread = threading.Thread(target=self.run_parser)
-        parser_thread.daemon = True
-        parser_thread.start()
+    def second_load_data(self):
+        """Загрузка данных из файла JSON"""
+        with open('data.json', 'r', encoding='utf-8') as f:
+            self.data = json.load(f)
 
-    def run_parser(self):
-        """Запуск парсера"""
-        parser.run_parser()
+    async def run_other_script(self):
+        # Код запуска скрипта
+        print('работа парсера')
+        await self.run_parser()
+        print('работа парсера')
+        self.second_load_data()
+        print('загрузка данных')
+
+    def check_time(self):
+        # Получаем текущее время
+        now = datetime.now()
+        if now.minute % 5 == 0:
+            # Если да, запускаем другой скрипт
+            asyncio.run(self.run_other_script())
+
+    def run_parser_script(self):
+        # Вызываем run_other_script один раз сразу после запуска приложения
+        # asyncio.run(self.run_other_script())
+        # Планирование задачи на каждую минуту
+        schedule.every(10).seconds.do(self.check_time)
+        Clock.schedule_interval(lambda dt: schedule.run_pending(), 10)
+
+    async def run_parser_in_background(self):
+        """Запуск парсера в фоновом потоке"""
+        self.show_loading_message()
+        asyncio.run(self.run_parser())
         self.load_data()
         self.hide_loading_message()
+
+    async def find_files_links(self, source_url):
+        # функция находит ссылки на файлы, используя исходный URL.
+        async with httpx.AsyncClient() as client:
+            response = await client.get(source_url)  # получает HTTP-ответ от сервера
+            soup = BeautifulSoup(response.text,
+                                 'html.parser')  # анализирует полученный HTML-код с помощью библиотеки BeautifulSoup
+            files_links = [a['href'] for a in soup.find_all('a', href=True) if a['href'].startswith('files/')]  # извлекает ссылки на файлы из найденных элементов <a>
+        return files_links  # возвращает список найденных ссылок на файлы
+
+    async def combine_base_url_with_files_links(self, base_url, files_links):
+        # объединяет базовый URL с каждой ссылкой на файл из списка files_links
+        combined_links = [base_url + link for link in files_links]
+        return combined_links
+
+    async def parse_combined_links(self, links):
+        # функция обрабатывает объединённые URL и извлекает данные из HTML-кода
+        data = []
+        # перебирает каждый URL из списка links
+        async with httpx.AsyncClient() as client:
+            for link in links:
+                response = await client.get(link)  # получает HTTP-ответ от сервера для каждого URL
+                soup = BeautifulSoup(response.text, 'html.parser')  # анализирует полученный HTML-код.
+                rows = soup.find_all('tr')  # находит все строки таблицы
+
+                # перебирает каждую строку таблицы
+                for row in rows:
+                    cols = row.find_all('td')  # находит все столбцы таблицы
+                    cell_data = {}
+                    for col in cols:
+                        if col.text != '':
+                            # Проверяем наличие и значение интересующих атрибутов
+                            if 'id' in col.attrs:
+                                col_id = col['id']
+                                col_id = col_id.rstrip()[:-1]
+                                cell_data['id'] = col_id
+                            if 'para' in col.attrs:
+                                cell_data['para'] = col['para']
+                            if 'day' in col.attrs:
+                                cell_data['day'] = col['day']
+                            if 'data' in col.attrs:
+                                cell_data['data'] = col['data']
+                            # Добавляем текст ячейки, если все интересующие атрибуты присутствуют
+                            if all(key in cell_data for key in ['id', 'day', 'data', 'para']):
+                                cell_data['text'] = col.text
+                                data.append(cell_data)
+                                cell_data = {}
+
+        # Сохраняем данные
+        with open('data.json', 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        # print(f"Данные успешно сохранены в файл")
+        return data
+
+    async def run_parser(self):
+        source_url = 'https://nfuunit.ru/timetable/fulltime/'
+        files_links = await self.find_files_links(source_url)
+        combined_links = await self.combine_base_url_with_files_links(source_url, files_links)
+        await self.parse_combined_links(combined_links)
 
     def show_loading_message(self):
         """Отображение сообщения о загрузке данных"""
@@ -80,7 +166,7 @@ class Example(MDApp):
                 )
                 self.screen.ids.list_result.add_widget(error_label)
             else:
-                if self.search_query.lower() == item['id'].lower() or self.search_query.lower() in item['text'].lower():
+                if self.search_query.lower() == item['id'].lower() or self.search_query.lower() in item['id'].lower() or self.search_query.lower() in item['text'].lower():
                     id_item = item['id']
                     day = item['day']
                     data = item['data']
@@ -137,7 +223,7 @@ class Example(MDApp):
 
                     label_text = MDLabel(
                         text=f"{class_['text']}",
-                        adaptive_height=True,
+                        size_hint_y=None,
                         theme_text_color="Custom",
                         text_color=(0, 0, 0, 1)  # Цвет для занятий
                     )
@@ -167,8 +253,4 @@ class Example(MDApp):
 
 
 if __name__ == "__main__":
-    background_parser = threading.Thread(target=the_parsing_script.main_0())
-    background_parser.daemon = True
-    background_parser.start()
     Example().run()
-

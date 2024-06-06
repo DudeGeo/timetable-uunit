@@ -1,0 +1,257 @@
+<DrawerClickableItem@MDNavigationDrawerItem>
+    focus_color: "#e7e4c0"
+    text_color: "#4a4939"
+    icon_color: "#4a4939"
+    ripple_color: "#c5bdd2"
+    selected_color: "#0c6c4d"
+
+<TextButton@MDFlatButton>
+    focus_color: "#e7e4c0"
+    text_color: "#4a4939"
+    icon_color: "#4a4939"
+    ripple_color: "#c5bdd2"
+    selected_color: "#0c6c4d"
+
+MDScreen:
+
+    MDBoxLayout:
+        orientation: 'vertical'
+
+        MDTopAppBar:
+            title: 'НФ УУНиТ'
+            type_height: "small"
+            theme_font_styles: 'Display'
+            md_bg_color: 0, 0, 100, 1
+            left_action_items: [["menu", lambda x: nav_drawer_left.set_state('open')]]
+
+        Widget:
+
+    MDNavigationLayout:
+
+        ScreenManager:
+            id: screen_manager
+            default: main_screen
+
+            Screen:
+                id: main_screen
+                name: "main_screen"
+
+                MDBoxLayout:
+                    md_bg_color: 255, 74, 73, 1
+                    orientation: 'vertical'
+                    padding: '20dp'
+                    spacing: '5dp'
+                    radius: "10dp"
+                    size_hint_x: 1
+                    size_hint_y: .25
+                    pos_hint: {"center_x": .5, "top": .9}
+
+                    MDLabel:
+                        text: "Введите название группы или Фамилию И.О. преподавателя"
+                        text_font_style: "Display"
+                        halign: "center"
+                        size_hint_x: 1
+                        pos_hint: {"center_y": .5}
+
+                    MDTextField:
+                        id: search
+                        text_font_style: "Display"
+                        helper_text: "Пример: ИС-41к"
+                        helper_text_mode: "persistent"
+                        size_hint_x: 1
+                        pos_hint: {"center_y": .5}
+                        multiline: False
+                        on_text: app.search_query = self.text
+
+                    MDFillRoundFlatButton:
+                        text: "OK"
+                        text_font_style: "Display"
+                        theme_text_color: "Custom"
+                        size_hint_x: 1
+                        pos_hint: {"center_y": .5}
+                        on_press: app.search_data()
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    md_bg_color: 255, 74, 73, 1
+                    padding: '20dp'
+                    size_hint_x: 1
+                    size_hint_y: .64
+
+                    MDScrollView:
+
+                        MDList:
+                            id: list_result
+                            size_hint_y: None
+
+            Screen:
+                name: "about_prog"
+
+                MDBoxLayout:
+                    md_bg_color: 255, 74, 73, 1
+                    orientation: 'vertical'
+                    padding: '20dp'
+                    size_hint_x: 1
+                    size_hint_y: .2
+                    radius: "20dp"
+                    pos_hint: {"center_x": .5, "top": .85}
+
+                    MDLabel:
+                        text: "Данное приложение было разработанной студентом из группы ИС-41к в 2024 году."
+                        text_font_style: "Display"
+                        halign: "left"
+
+                    MDLabel:
+                        text: "Разработчик: Chebupelia"
+                        text_font_style: "Display"
+                        theme_text_color: "Custom"
+                        text_color: "red"
+                        halign: "left"
+
+            Screen:
+                name: "ebs"
+
+                MDBoxLayout:
+                    md_bg_color: 19, 161, 147, 1
+                    orientation: 'vertical'
+                    padding: '10dp'
+                    size_hint_x: 1
+                    size_hint_y: .2
+                    radius: "20dp"
+                    pos_hint: {"center_x": .5, "top": .85}
+
+                    TextButton:
+                        text: "ЭБС Башкирского государственного университета"
+                        text_font_style: "Display"
+                        theme_text_color: "Custom"
+                        text_color: "orange"
+                        size_hint_x: 1
+                        pos_hint: {"center_x": 0.5, "top": 0.1}
+                        on_release:
+                            import webbrowser
+                            webbrowser.open('https://elib.bashedu.ru/')
+
+                    TextButton:
+                        text: "ЭБС Университетская библитека online"
+                        text_font_style: "Display"
+                        theme_text_color: "Custom"
+                        text_color: "orange"
+                        size_hint_x: 1
+                        pos_hint: {"center_x": 0.5, "top": 0.1}
+                        on_release:
+                            import webbrowser
+                            webbrowser.open('https://biblioclub.ru/')
+
+                    TextButton:
+                        text: "ЭБС издательство Лань"
+                        text_font_style: "Display"
+                        theme_text_color: "Custom"
+                        text_color: "orange"
+                        size_hint_x: 1
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                        on_release:
+                            import webbrowser
+                            webbrowser.open('https://e.lanbook.com/')
+
+                    Widget:
+
+            Screen:
+                name: "settings_prog"
+
+                MDBoxLayout:
+                    md_bg_color: 19, 161, 147, 1
+                    orientation: 'vertical'
+                    padding: '10dp'
+                    size_hint_x: 1
+                    size_hint_y: .1
+                    radius: "20dp"
+                    pos_hint: {"center_x": .5, "top": .85}
+
+                    MDBoxLayout:
+                        orientation: 'horizontal'
+
+                        MDLabel:
+                            text: "Уведомления"
+                            text_font_style: "Display"
+                            theme_text_color: "Custom"
+                            halign: "left"
+                            padding: '20dp'
+
+                        MDCheckbox:
+                            group: 'option'
+                            active: True
+
+
+        MDNavigationDrawer:
+            id: nav_drawer_left
+            radius: (0, dp(16), dp(16), 0)
+            anchor: "left"
+            orientation: 'vertical'
+            theme_font_styles: 'Display'
+            spacing: 0
+            padding: 0
+
+            FitImage:
+                source: "image_navigation.jpg"
+                size_hint_y: None
+                height: '150dp'
+                radius: "16dp", "16dp", 0, 0
+
+            MDNavigationDrawerMenu:
+
+                DrawerClickableItem:
+                    icon: "timetable"
+                    size_hint_x: 1
+                    text: "Расписание"
+                    text_color: "#4a4931"
+                    on_press:
+                        nav_drawer_left.set_state('close')
+                        screen_manager.current = 'main_screen'
+
+                MDSeparator:
+
+                DrawerClickableItem:
+                    icon: "chat"
+                    size_hint_x: 1
+                    text: "Личный кабинет"
+                    text_color: "#4a4939"
+                    on_release:
+                        import webbrowser
+                        webbrowser.open('https://cabinet.nfuunit.ru/')
+
+                MDSeparator:
+
+                DrawerClickableItem:
+                    icon: "book"
+                    size_hint_x: 1
+                    text: "ЭБС"
+                    text_color: "#4a4333"
+                    on_press:
+                        nav_drawer_left.set_state('close')
+                        screen_manager.current = 'ebs'
+
+                MDSeparator:
+
+                DrawerClickableItem:
+                    icon: "information"
+                    size_hint_x: 1
+                    text: "О программе"
+                    text_color: "#4a4939"
+                    on_press:
+                        nav_drawer_left.set_state('close')
+                        screen_manager.current = 'about_prog'
+
+                MDSeparator:
+
+                DrawerClickableItem:
+                    icon: "dots-vertical"
+                    size_hint_x: 1
+                    text: "Настройки"
+                    text_color: "#4a4939"
+                    on_press:
+                        nav_drawer_left.set_state('close')
+                        screen_manager.current = 'settings_prog'
+
+                MDSeparator:
+
+                Widget:

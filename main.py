@@ -153,13 +153,13 @@ class Example(MDApp):
         if self.observer:
             self.observer.stop()
             self.observer.join()
-        observer = Observer()
-        observer.schedule(event_handler, filepath, recursive=False)
-        observer.start()
+        self.observer = Observer()
+        self.observer.schedule(event_handler, filepath, recursive=False)
+        self.observer.start()
 
-    def reload_data_and_notify(self):
+    def reload_data_and_notify(self, filepath):
         self.load_data()
-        self.send_notification("Изменения в расписании")
+        self.send_notification(f"Изменения в расписании {filepath}")
 
     def send_notification(self, message):
         notification_title = "Расписание НФ УУНиТ"

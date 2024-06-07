@@ -36,6 +36,7 @@ class Example(MDApp):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 self.data = json.load(f)
+            self.monitor_json_changes()
         except FileNotFoundError:
             # print("Ошибка при загрузке данных...")
             self.run_parser_in_background()
@@ -80,7 +81,7 @@ class Example(MDApp):
                 )
                 self.screen.ids.list_result.add_widget(error_label)
             else:
-                if self.search_query.lower() == item['id'].lower() or self.search_query.lower() in item['text'].lower():
+                if self.search_query.lower() in item['id'].lower() or self.search_query.lower() in item['text'].lower():
                     id_item = item['id']
                     day = item['day']
                     data = item['data']
@@ -156,8 +157,8 @@ class Example(MDApp):
         observer.schedule(event_handler, filepath, recursive=False)
         observer.start()
 
-    def reload_data_and_notify(self, filepath):
-        self.load_data(filepath)
+    def reload_data_and_notify(self):
+        self.load_data()
         self.send_notification("Изменения в расписании")
 
     def send_notification(self, message):
@@ -167,7 +168,7 @@ class Example(MDApp):
 
 
 if __name__ == "__main__":
-    background_parser = threading.Thread(target=the_parsing_script.main_0())
+    background_parser = threading.Thread(target=the_parsing_script.main_0)
     background_parser.daemon = True
     background_parser.start()
     Example().run()

@@ -1,13 +1,17 @@
+import parser
 import schedule
 from datetime import datetime
-import parser
+import threading
+
 from kivy.clock import Clock
 
 
 def run_other_script():
     # Код запуска скрипта
     # print('работа парсера')
-    parser.run_parser()
+    parser_thread_script = threading.Thread(target=parser.run_parser)
+    parser_thread_script.daemon = True
+    parser_thread_script.start()
     # print('работа парсера')
 
 

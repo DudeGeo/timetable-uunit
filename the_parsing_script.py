@@ -24,7 +24,7 @@ def check_time():
 
 def main_0():
     # Вызываем run_other_script один раз сразу после запуска приложения
-    # run_other_script()
+    run_other_script()
     # Планирование задачи на каждые 10 секунд
     schedule.every(15).seconds.do(check_time)
     Clock.schedule_interval(lambda dt: schedule.run_pending(), 15)
